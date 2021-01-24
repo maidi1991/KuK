@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KuKContext.cs" />
+    <Compile Include="Methods\NoticeMethods.cs" />
     <Compile Include="Migrations\202101240931565_Initial.cs" />
     <Compile Include="Migrations\202101240931565_Initial.Designer.cs">
       <DependentUpon>202101240931565_Initial.cs</DependentUpon>
