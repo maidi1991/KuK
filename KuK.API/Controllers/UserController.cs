@@ -1,9 +1,8 @@
 ﻿using KuK.Service;
+using KuK.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -13,10 +12,11 @@ namespace KuK.API.Controllers
     public class UserController : ApiController
     {
 
-        private UserService _userService = new UserService {};
+        private UserService _userService = new UserService {}; //this is service and other is in services ?? vs is weird
+        private LogService _logService = new LogService { };
 
         [HttpGet]
-        public IHttpActionResult GetUsers()
+        public IHttpActionResult GetUsers(int userID)
         {
             try
             {
@@ -27,10 +27,11 @@ namespace KuK.API.Controllers
                 }
                 return Ok(list);
             }
-            catch(Exception ex)//catch any exxception this is an antipatern any exxception shold be threated deiferent
+            catch(Exception ex)//catch any exception this is an antipatern any exxception shold be threated deiferent
             {
-                //To DO Log Exception
-                return InternalServerError();
+                var text = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(text, userID);
+                return InternalServerError(); //user shuld not know what is wrong, admin should only know
             }
         }
 
@@ -40,14 +41,31 @@ namespace KuK.API.Controllers
         {
             try
             {
+                password = GetHashString(password);
                 _userService.AddUser(firstName, lastName, password, emailAddress);
                 return Ok();
             }
             catch(Exception ex)
             {
-                //TO DO log expeption ex
+                var text = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(text, 0);
                 return InternalServerError(); //user shuld not know what is wrong, admin should only know
             }
+        }
+
+        private static byte[] GetHash(string inputString)
+        {
+            using (HashAlgorithm algorithm = SHA256.Create())
+                return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
+        }
+
+        private static string GetHashString(string inputString)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in GetHash(inputString))
+                sb.Append(b.ToString("X2"));
+
+            return sb.ToString();
         }
 
     }

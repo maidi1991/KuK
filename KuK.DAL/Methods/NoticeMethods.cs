@@ -69,7 +69,7 @@ namespace KuK.DAL.Methods
             }
             catch (Exception ex) //antipatern but catch any exception an log it later, every exception shuld be threated other but we expect only db excepions since we have a litle logic 
             {
-                //do  someting to retry
+                //do someting to retry
                 throw ex; //thow old exception to not lose stacktrace
             }
             return result;

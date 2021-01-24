@@ -1,16 +1,15 @@
 ﻿using KuK.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace KuK.API.Controllers
 {
+    [EnableCors("*", "*", "*")] //any origin is allowed but restrict to frontend app
     public class NoticeController : ApiController
     {
         private NoticeService _noticeService = new NoticeService { };
+        private LogService _logService = new LogService { };
 
         [HttpGet]
         public IHttpActionResult GetAllNotices(int userID)
@@ -22,7 +21,8 @@ namespace KuK.API.Controllers
             }
             catch(Exception ex)
             {
-                //TO DO log exception
+                var text = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(text, userID);
                 return InternalServerError();
             }
         }
@@ -37,7 +37,8 @@ namespace KuK.API.Controllers
             }
             catch (Exception ex)
             {
-                //TO DO log exception
+                var text = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(text, userID);
                 return InternalServerError();
             }
         }
@@ -52,25 +53,27 @@ namespace KuK.API.Controllers
             }
             catch (Exception ex)
             {
-                //TO DO log exception
+                var error = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(error, userID);
                 return InternalServerError();
             }
         }
 
         [HttpPut]
-        public IHttpActionResult EditNotice([FromBody]int userID, int noticeID, string text)
+        public IHttpActionResult EditNotice([FromBody] int userID, int noticeID, string text)
         {
-                try
-                {
-                    _noticeService.EditNotice(userID, noticeID, text);
-                    return Ok();
-                }
-                catch (Exception ex)
-                {
-                    //TO DO log exception
-                    return InternalServerError();
-                }
+            try
+            {
+                _noticeService.EditNotice(userID, noticeID, text);
+                return Ok();
             }
+            catch (Exception ex)
+            {
+                var error = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(error, userID);
+                return InternalServerError();
+            }
+        }
 
         [HttpDelete]
         public IHttpActionResult DeleteNotice(int userID, int noticeID)
@@ -82,7 +85,8 @@ namespace KuK.API.Controllers
             }
             catch (Exception ex)
             {
-                //TO DO log exception
+                var error = ex.Message + " " + ex.StackTrace.ToString();
+                _logService.AddError(error, userID);
                 return InternalServerError();
             }
         }
